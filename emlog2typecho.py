@@ -118,7 +118,7 @@ cur.execute("select MAX( mid ) FROM `typecho_metas`")
 sort_max_id = cur.fetchall()[0][0] + 1 
 # 从刚插入的分类最后一个ID+1作为ID开始循环插入
 for tag in emlog_tag_list:
-    cur.execute("insert into `typecho_metas` (`mid`, `name`, `slug`, `type`, `description`, `count`, `order`) VALUES (%s, %s, NULL, 'tag', NULL, %s, '0');",(sort_max_id,tag['tagname'],len(tag['gidlist'])))
+    cur.execute("insert into `typecho_metas` (`mid`, `name`, `slug`, `type`, `description`, `count`, `order`) VALUES (%s, %s, %s, 'tag', NULL, %s, '0');",(sort_max_id,tag['tagname'],tag['tagname'],len(tag['gidlist'])))
     for gid in tag['gidlist']:
         params = (int(gid),sort_max_id)
         # ！有时会遇到重复项插入失败跳过
