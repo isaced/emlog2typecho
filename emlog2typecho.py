@@ -1,14 +1,41 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*- 
-# By isaced - https://github.com/isaced/emlog2typecho
+#
+# Descrption:emlog2typecho 是一个用python写的脚本，用来迁移Emlog的数据库到Typecho。
+#
+# Github: https://github.com/isaced/emlog2typecho
+# Author: isaced@163.com
+
+# 一些设置项
+
+# Emlog 数据库名
+emlog_database_name = 'emlog'
+# Typecho 数据库名
+typecho_database_name = 'typecho'
+# 数据库地址
+database_host = 'localhost'
+# 数据库用户名
+database_port = 3306
+# 数据库用户名
+database_user_name = 'root'
+# 数据库用户名
+database_user_password = 'root'
+# 字符集
+database_charset = 'utf8'
+
+#################################################################################
 
 import MySQLdb
 
 # 连接数据库...
-conn=MySQLdb.connect(host='localhost',user='root',passwd='root',port=3306,charset='utf8')
+conn=MySQLdb.connect(host    =   database_host,
+                     user    =   database_user_name,
+                     passwd  =   database_user_password,
+                     port    =   database_port,
+                     charset =   database_charset)
 
 # 切换emlog数据库...
-conn.select_db('emlog')
+conn.select_db(emlog_database_name)
 cur=conn.cursor()
 
 # 读取emlog所有分类
@@ -25,7 +52,7 @@ cur.execute('select gid,title,date,content,excerpt,alias,sortid,type  from emlog
 emlog_blog_list = cur.fetchall()
 
 # 切换Typecho数据库...
-conn.select_db('typecho')   
+conn.select_db(typecho_database_name)   
 cur=conn.cursor()
 
 # 删除Typecho 所有分类和标签...
