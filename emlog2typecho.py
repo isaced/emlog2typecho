@@ -42,10 +42,21 @@ cur=conn.cursor()
 cur.execute('select sid, sortname, alias, ( select count( * ) from emlog_blog where sortid = sid ) AS count FROM emlog_sort')
 emlog_sort_list = cur.fetchall()
 
-
 # 读取Emlog所有Tag
-cur.execute('select tid,tagname from emlog_tag')
-emlog_tag_list = cur.fetchall()
+cur.execute('select tid,tagname,gid from emlog_tag')
+emlog_tag_list = []
+for row in cur.fetchall():
+    tagname = row[1]
+    gid_list = row[2].split(',')
+
+    # 移除列表中为空字符串的项
+    for gid in gid_list:
+        if gid == '':
+            gid_list.remove(gid)
+    # 组装
+    tag = {'tagname':tagname,'gidlist':gid_list}
+    emlog_tag_list.append(tag)
+
 
 # 读取emlog blog表...
 cur.execute('select gid,title,date,content,excerpt,alias,sortid,type  from emlog_blog')
@@ -101,6 +112,21 @@ for blog in emlog_blog_list:
     if blog_sortid == -1:
         continue
     cur.execute('insert into `typecho_relationships` (`cid`, `mid`) VALUES (%s, %s)',(blog_id,blog_sortid))
+
+# 插入所有Tag（和关系）
+cur.execute("select MAX( mid ) FROM `typecho_metas`")
+sort_max_id = cur.fetchall()[0][0] + 1 
+# 从刚插入的分类最后一个ID+1作为ID开始循环插入
+for tag in emlog_tag_list:
+    cur.execute("insert into `typecho_metas` (`mid`, `name`, `slug`, `type`, `description`, `count`, `order`) VALUES (%s, %s, NULL, 'tag', NULL, %s, '0');",(sort_max_id,tag['tagname'],len(tag['gidlist'])))
+    for gid in tag['gidlist']:
+        params = (int(gid),sort_max_id)
+        # ！有时会遇到重复项插入失败跳过
+        try:
+            cur.execute('insert into `typecho_relationships` (`cid`, `mid`) VALUES (%s, %s)',params)
+        except:
+            print '失败一条Tag:%s,%s' % (params)
+    sort_max_id = sort_max_id + 1
 
 cur.close()
 conn.close()
