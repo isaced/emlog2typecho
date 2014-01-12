@@ -57,10 +57,17 @@ for row in cur.fetchall():
     tag = {'tagname':tagname,'gidlist':gid_list}
     emlog_tag_list.append(tag)
 
-
 # 读取emlog blog表...
 cur.execute('select gid,title,date,content,excerpt,alias,sortid,type  from emlog_blog')
 emlog_blog_list = cur.fetchall()
+
+# 读取Emlog comment表
+cur.execute("SELECT * FROM `emlog_comment`")
+emlog_comment_list = cur.fetchall()
+
+# ------------------------------------------
+# --- Emlog表读取完毕，切换Typecho表进行写入 ---
+# ------------------------------------------
 
 # 切换Typecho数据库...
 conn.select_db(typecho_database_name)   
@@ -81,6 +88,8 @@ for sort in emlog_sort_list:
 cur.execute('delete from typecho_contents')
 # 删除文章所有关系
 cur.execute('delete from typecho_relationships')
+# 删除所有评论
+cur.execute('delete from typecho_comments')
 
 # 转移所有文章
 for blog in emlog_blog_list:
@@ -115,7 +124,8 @@ for blog in emlog_blog_list:
 
 # 插入所有Tag（和关系）
 cur.execute("select MAX( mid ) FROM `typecho_metas`")
-sort_max_id = cur.fetchall()[0][0] + 1 
+sort_max_id = (cur.fetchall()[0][0]) + 1
+
 # 从刚插入的分类最后一个ID+1作为ID开始循环插入
 for tag in emlog_tag_list:
     cur.execute("insert into `typecho_metas` (`mid`, `name`, `slug`, `type`, `description`, `count`, `order`) VALUES (%s, %s, %s, 'tag', NULL, %s, '0');",(sort_max_id,tag['tagname'],tag['tagname'],len(tag['gidlist'])))
@@ -128,6 +138,12 @@ for tag in emlog_tag_list:
             print '失败一条Tag:%s,%s' % (params)
     sort_max_id = sort_max_id + 1
 
+# 插入评论
+for comment in emlog_comment_list:
+    params = (comment[0],comment[1],comment[3],comment[4],comment[6],comment[7],comment[8],comment[5],comment[2])
+    cur.execute("INSERT INTO `typecho_comments` (`coid`, `cid`, `post_id`, `created`, `author`, `authorId`, `ownerId`, `mail`, `url`, `ip`, `agent`, `text`, `type`, `status`, `parent`) VALUES (%s, %s, '0', %s, %s, '0', '1', %s, %s, %s, NULL, %s, 'comment' , 'approved', %s)",params)
+
+# 关闭数据库连接
 cur.close()
 conn.close()
 
