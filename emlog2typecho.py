@@ -58,7 +58,7 @@ for row in cur.fetchall():
     emlog_tag_list.append(tag)
 
 # 读取emlog blog表...
-cur.execute('select gid,title,date,content,excerpt,alias,sortid,type  from emlog_blog')
+cur.execute('select gid,title,date,content,excerpt,alias,sortid,type,allow_remark from emlog_blog')
 emlog_blog_list = cur.fetchall()
 
 # 读取Emlog comment表
@@ -93,6 +93,7 @@ cur.execute('delete from typecho_comments')
 
 # 转移所有文章
 for blog in emlog_blog_list:
+    print blog
     blog_id = blog[0]
     blog_title = blog[1]
     blog_create_date = blog[2]
@@ -111,8 +112,14 @@ for blog in emlog_blog_list:
     else:
         blog_type = 'page'
 
-    params = (blog_id,blog_title,blog_alias,blog_create_date,blog_content,blog_type)
-    cur.execute("insert into `typecho_contents` (`cid`, `title`, `slug`, `created`, `modified`, `text`, `order`, `authorId`, `template`, `type`, `status`, `password`, `commentsNum`, `allowComment`, `allowPing`, `allowFeed`, `parent`) VALUES (%s, %s, %s, %s, NULL, %s, '0', '1', NULL, %s, 'publish', NULL, '0', '0', '0', '0', '0')",params)
+    # allow comment
+    if blog[8] == 'y':
+        blog_allow_comment = '1'
+    else:
+        blog_allow_comment = '0'
+
+    params = (blog_id,blog_title,blog_alias,blog_create_date,blog_content,blog_type,blog_allow_comment)
+    cur.execute("insert into `typecho_contents` (`cid`, `title`, `slug`, `created`, `modified`, `text`, `order`, `authorId`, `template`, `type`, `status`, `password`, `commentsNum`, `allowComment`, `allowPing`, `allowFeed`, `parent`) VALUES (%s, %s, %s, %s, NULL, %s, '0', '1', NULL, %s, 'publish', NULL, '0', %s, '0', '0', '0')",params)
 
     # 添加文章的relationships
     blog_sortid = blog[6]
