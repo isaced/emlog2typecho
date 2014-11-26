@@ -148,7 +148,7 @@ for tag in emlog_tag_list:
 # 插入评论
 for comment in emlog_comment_list:
     params = (comment[0],comment[1],comment[3],comment[4],comment[6],comment[7],comment[8],comment[5],comment[2])
-    cur.execute("INSERT INTO `typecho_comments` (`coid`, `cid`, `post_id`, `created`, `author`, `authorId`, `ownerId`, `mail`, `url`, `ip`, `agent`, `text`, `type`, `status`, `parent`) VALUES (%s, %s, '0', %s, %s, '0', '1', %s, %s, %s, NULL, %s, 'comment' , 'approved', %s)",params)
+    cur.execute("INSERT INTO `typecho_comments` (`coid`, `cid`, `created`, `author`, `authorId`, `ownerId`, `mail`, `url`, `ip`, `agent`, `text`, `type`, `status`, `parent`) VALUES (%s, %s, %s, %s, '0', '1', %s, %s, %s, NULL, %s, 'comment' , 'approved', %s)",params)
 
 # 关闭数据库连接
 cur.close()
