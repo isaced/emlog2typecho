@@ -3,6 +3,10 @@ Emlog2Typecho
 
 emlog2typecho 是一个用python写的脚本，用来迁移Emlog的数据库到Typecho。
 
+###最新测试通过版本
+- Typecho : 1.0 (14.10.10)
+- Emlog : 5.3.1
+
 ###使用方法
 
 1. 在本地新建emlog数据库并导入需要转换的数据
@@ -15,6 +19,7 @@ emlog2typecho 是一个用python写的脚本，用来迁移Emlog的数据库到T
 
 - 此Python代码用到了MySQLdb库来连接MySQL，没有这个包的可以用pip安装：` pip install MySQL-python `
 - Typecho最好是新安装出来的空数据库，以免出现不必要的麻烦
+- 源数据库 (emlog) 尽量保持各项数据 (如：评论、分类、标签) 都至少有一条，以免出现问题
 
 ###状态
 转移数据	| 状态
